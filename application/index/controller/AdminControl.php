@@ -55,6 +55,9 @@ class AdminControl extends Controller
     		return false;
     	}
 
+        // 方法来源
+        $action = request() -> action();
+
     	// 加密算法
         $signer = new Sha256();
 
@@ -76,7 +79,7 @@ class AdminControl extends Controller
         }
 
         // 判断token类型
-        if ($userInfo['scope'] == 'refresh_token') {
+        if ($userInfo['scope'] == 'refresh_token' && $action == 'refreshtoken') {
 
         	// 获取jwt信息
         	$jti = $token -> getHeader('jti');
@@ -102,9 +105,9 @@ class AdminControl extends Controller
 					'refresh_token' => $refresh_token
 				],
 				'message' => 'success',
-				'code' => response() -> getCode()
+				'code' => 200
 	   		]);die;
-        } elseif ($userInfo['scope'] == 'access_token') {
+        } elseif ($userInfo['scope'] == 'access_token' && $action != 'refreshtoken') {
         	return $userInfo;
         } else {
         	echo json_encode(['code' => '10004', 'message' => 'token type error']);die;
@@ -155,10 +158,10 @@ class AdminControl extends Controller
      */
     protected final function checkAction()
     {
-        $action = request()->action();
+        $action = request() -> action();
         //以下几项不需要验证
         $tmp = array('getuserinfoandgettoken', 'refreshtoken');
-        if (in_array($action,$tmp)){
+        if (in_array($action, $tmp)){
             return true;
         }
         echo json_encode(['code' => '10001', 'message' => 'please sign in']);die;

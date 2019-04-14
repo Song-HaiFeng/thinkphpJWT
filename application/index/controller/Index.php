@@ -13,7 +13,7 @@ class Index extends AdminControl
    	public function getAuth()
    	{
    		$data = $this -> getUserInfo();
-   		return json(['data' => $data, 'message' => 'success', 'code' => response() -> getCode()]);
+   		return json(['data' => $data, 'message' => 'success', 'code' => 200]);
    	}
 
    	// 刷新access_token
@@ -46,7 +46,7 @@ class Index extends AdminControl
 				'refresh_token' => $refresh_token
 			],
 			'message' => 'success',
-			'code' => response() -> getCode()
+			'code' => 200
    		]);
 
    	}
