@@ -66,13 +66,13 @@ class AdminControl extends Controller
 
         // 验证token是否合法
         if(!$token -> verify($signer, $this -> key)){
-            echo json_encode(['code' => '10002', 'msg' => 'token is not legal']);die;
+            echo json_encode(['code' => '10002', 'message' => 'token is not legal']);die;
         }
 
         // 判断token是否过期
         $tokenEXP = $token->getClaim('exp');
         if ($tokenEXP <= time()) {
-        	echo json_encode(['code' => '10003', 'msg' => 'token has expired']);die;
+        	echo json_encode(['code' => '10003', 'message' => 'token has expired']);die;
         }
 
         // 判断token类型
@@ -84,7 +84,7 @@ class AdminControl extends Controller
         	// 判断是否存在此jti对应的token
         	$redis = new Redis();
         	if (!$redis -> get($jti)) {
-        		echo json_encode(['code' => '10005', 'msg' => 'token is not found']);die;
+        		echo json_encode(['code' => '10005', 'message' => 'token is not found']);die;
         	} else {
         		$redis -> rm($jti);
         	}
@@ -107,7 +107,7 @@ class AdminControl extends Controller
         } elseif ($userInfo['scope'] == 'access_token') {
         	return $userInfo;
         } else {
-        	echo json_encode(['code' => '10004', 'msg' => 'token type error']);die;
+        	echo json_encode(['code' => '10004', 'message' => 'token type error']);die;
         }
 
     }
@@ -118,7 +118,7 @@ class AdminControl extends Controller
      * @param bool false获取access_token,true获取refresh_token
      * @return string token
      */
-    public function getToken($user, $flag = false)
+    protected function getToken($user, $flag = false)
     {
     	if (!$flag) {
     		$user['scope'] = 'access_token';
@@ -161,7 +161,7 @@ class AdminControl extends Controller
         if (in_array($action,$tmp)){
             return true;
         }
-        echo json_encode(['code' => '10001', 'msg' => 'please sign in']);die;
+        echo json_encode(['code' => '10001', 'message' => 'please sign in']);die;
     }
 
    	/**
@@ -170,7 +170,7 @@ class AdminControl extends Controller
      * @param
      * @return array 用户信息
      */
-   	public function getUserInfo()
+   	protected function getUserInfo()
    	{
    		return $this -> loginUserInfo;
    	}
