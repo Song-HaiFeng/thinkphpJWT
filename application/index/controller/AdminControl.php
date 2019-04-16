@@ -75,7 +75,7 @@ class AdminControl extends Controller
         // 判断token是否过期
         $tokenEXP = $token->getClaim('exp');
         if ($tokenEXP <= time()) {
-        	echo json_encode(['code' => '10003', 'message' => 'token has expired']);die;
+        	echo json_encode(['code' => '10003', 'message' => $userInfo['scope'].' has expired']);die;
         }
 
         // 判断token类型
