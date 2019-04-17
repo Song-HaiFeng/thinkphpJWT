@@ -41,14 +41,13 @@ class Index extends AdminControl
 
    		// 返回数据
    		return json([
-			'data' => [
-				'access_token' => $access_token,
-				'refresh_token' => $refresh_token
-			],
-			'message' => 'success',
-			'code' => 200
+   			'data' => [
+   				'access_token' => $access_token,
+   				'refresh_token' => $refresh_token
+   			],
+   			'message' => 'success',
+   			'code' => 200
    		]);
-
    	}
 
 }

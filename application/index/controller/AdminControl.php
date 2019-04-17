@@ -69,13 +69,14 @@ class AdminControl extends Controller
 
         // 验证token是否合法
         if(!$token -> verify($signer, $this -> key)){
-            echo json_encode(['code' => '10002', 'message' => 'token is not legal']);die;
+            exit(json_encode(['code' => '-101', 'message' => 'token is not legal']));
         }
 
         // 判断token是否过期
         $tokenEXP = $token->getClaim('exp');
         if ($tokenEXP <= time()) {
-        	echo json_encode(['code' => '10003', 'message' => $userInfo['scope'].' has expired']);die;
+            $userInfo['scope'] == 'access_token' ? $code = '-102' : $code = '-103';
+        	exit(json_encode(['code' => $code, 'message' => $userInfo['scope'].' has expired']));
         }
 
         // 判断token类型
@@ -87,7 +88,7 @@ class AdminControl extends Controller
         	// 判断是否存在此jti对应的token
         	$redis = new Redis();
         	if (!$redis -> get($jti)) {
-        		echo json_encode(['code' => '10005', 'message' => 'token is not found']);die;
+        		exit(json_encode(['code' => '-105', 'message' => 'token is not found']));
         	} else {
         		$redis -> rm($jti);
         	}
@@ -99,18 +100,18 @@ class AdminControl extends Controller
 	   		$refresh_token = $this -> getToken($userInfo, true);
 
 	   		// 返回数据
-	   		echo json_encode([
+	   		exit(json_encode([
 				'data' => [
 					'access_token' => $access_token,
 					'refresh_token' => $refresh_token
 				],
 				'message' => 'success',
 				'code' => 200
-	   		]);die;
+	   		]));
         } elseif ($userInfo['scope'] == 'access_token' && $action != 'refreshtoken') {
         	return $userInfo;
         } else {
-        	echo json_encode(['code' => '10004', 'message' => 'token type error']);die;
+        	exit(json_encode(['code' => '-104', 'message' => 'token type error']));
         }
 
     }
@@ -164,7 +165,7 @@ class AdminControl extends Controller
         if (in_array($action, $tmp)){
             return true;
         }
-        echo json_encode(['code' => '10001', 'message' => 'please sign in']);die;
+        exit(json_encode(['code' => '-100', 'message' => 'please sign in']));
     }
 
    	/**
