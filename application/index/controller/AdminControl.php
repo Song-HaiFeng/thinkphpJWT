@@ -61,57 +61,61 @@ class AdminControl extends Controller
     	// 加密算法
         $signer = new Sha256();
 
-    	// 获取token并转为对象
-        $token = (new Parser()) -> parse((string) $tokenInfo);
+        try {
+            // 获取token并转为对象
+            $token = (new Parser()) -> parse((string) $tokenInfo);
 
-        // 获取token内用户信息
-        $userInfo = (Array) $token -> getClaim('data');
+            // 获取token内用户信息
+            $userInfo = (Array) $token -> getClaim('data');
 
-        // 验证token是否合法
-        if(!$token -> verify($signer, $this -> key)){
-            exit(json_encode(['code' => '-101', 'message' => 'token is not legal']));
-        }
+            // 验证token是否合法
+            if(!$token -> verify($signer, $this -> key)){
+                exit(json_encode(['code' => '-101', 'message' => 'token is not legal']));
+            }
 
-        // 判断token是否过期
-        $tokenEXP = $token->getClaim('exp');
-        if ($tokenEXP <= time()) {
-            $userInfo['scope'] == 'access_token' ? $code = '-102' : $code = '-103';
-        	exit(json_encode(['code' => $code, 'message' => $userInfo['scope'].' has expired']));
-        }
+            // 判断token是否过期
+            $tokenEXP = $token->getClaim('exp');
+            if ($tokenEXP <= time()) {
+                $userInfo['scope'] == 'access_token' ? $code = '-102' : $code = '-103';
+                exit(json_encode(['code' => $code, 'message' => $userInfo['scope'].' has expired']));
+            }
 
-        // 判断token类型
-        if ($userInfo['scope'] == 'refresh_token' && $action == 'refreshtoken') {
+            // 判断token类型
+            if ($userInfo['scope'] == 'refresh_token' && $action == 'refreshtoken') {
 
-        	// 获取jwt信息
-        	$jti = $token -> getHeader('jti');
+                // 获取jwt信息
+                $jti = $token -> getHeader('jti');
 
-        	// 判断是否存在此jti对应的token
-        	$redis = new Redis();
-        	if (!$redis -> get($jti)) {
-        		exit(json_encode(['code' => '-105', 'message' => 'token is not found']));
-        	} else {
-        		$redis -> rm($jti);
-        	}
+                // 判断是否存在此jti对应的token
+                $redis = new Redis();
+                if (!$redis -> get($jti)) {
+                    exit(json_encode(['code' => '-105', 'message' => 'token is not found']));
+                } else {
+                    $redis -> rm($jti);
+                }
 
-        	// 获取access_token
-	   		$access_token = $this -> getToken($userInfo);
+                // 获取access_token
+                $access_token = $this -> getToken($userInfo);
 
-	   		// 获取refresh_token
-	   		$refresh_token = $this -> getToken($userInfo, true);
+                // 获取refresh_token
+                $refresh_token = $this -> getToken($userInfo, true);
 
-	   		// 返回数据
-	   		exit(json_encode([
-				'data' => [
-					'access_token' => $access_token,
-					'refresh_token' => $refresh_token
-				],
-				'message' => 'success',
-				'code' => 200
-	   		]));
-        } elseif ($userInfo['scope'] == 'access_token' && $action != 'refreshtoken') {
-        	return $userInfo;
-        } else {
-        	exit(json_encode(['code' => '-104', 'message' => 'token type error']));
+                // 返回数据
+                exit(json_encode([
+                    'data' => [
+                        'access_token' => $access_token,
+                        'refresh_token' => $refresh_token
+                    ],
+                    'message' => 'success',
+                    'code' => 200
+                ]));
+            } elseif ($userInfo['scope'] == 'access_token' && $action != 'refreshtoken') {
+                return $userInfo;
+            } else {
+                exit(json_encode(['code' => '-104', 'message' => 'token type error']));
+            }
+        } catch (\Exception $e) {
+            exit(json_encode(['code' => '-107', 'message' => $e -> getMessage()]));
         }
 
     }
